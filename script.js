@@ -49,15 +49,24 @@ let deniedCount     = 0;   // Accesos rechazados hoy
 
 // Base de datos simulada de residentes autorizados.
 // Al autorizar, se elige uno al azar de esta lista.
+// `type` distingue entre residentes con vehiculo ('vehicle')
+// y residentes que ingresan a pie ('pedestrian').
 const residentsDB = [
-    { name: 'Juan Perez',     apt: 'Torre A - 302', vehicle: 'Mazda CX-30 gris',      plate: 'KLM 482', status: 'Activo' },
-    { name: 'Maria Gomez',    apt: 'Torre B - 105', vehicle: 'Toyota Corolla blanco', plate: 'RZX 914', status: 'Activo' },
-    { name: 'Carlos Ruiz',    apt: 'Torre A - 418', vehicle: 'Renault Duster azul',   plate: 'HBT 227', status: 'Activo' },
-    { name: 'Ana Torres',     apt: 'Torre C - 220', vehicle: 'Kia Picanto rojo',      plate: 'NQP 631', status: 'Activo' },
-    { name: 'Luis Fernandez', apt: 'Torre B - 310', vehicle: 'Chevrolet Onix negro',  plate: 'VCD 708', status: 'Activo' },
+    { type: 'vehicle',    name: 'Juan Perez',     apt: 'Torre A - 302', vehicle: 'Mazda CX-30 gris',      plate: 'KLM 482', status: 'Activo' },
+    { type: 'vehicle',    name: 'Maria Gomez',    apt: 'Torre B - 105', vehicle: 'Toyota Corolla blanco', plate: 'RZX 914', status: 'Activo' },
+    { type: 'pedestrian', name: 'Carlos Ruiz',    apt: 'Torre A - 418', status: 'Activo' },
+    { type: 'vehicle',    name: 'Ana Torres',     apt: 'Torre C - 220', vehicle: 'Kia Picanto rojo',      plate: 'NQP 631', status: 'Activo' },
+    { type: 'pedestrian', name: 'Luis Fernandez', apt: 'Torre B - 310', status: 'Activo' },
+    { type: 'vehicle',    name: 'Sofia Mendoza',  apt: 'Torre C - 145', vehicle: 'Renault Duster azul',   plate: 'HBT 227', status: 'Activo' },
+    { type: 'pedestrian', name: 'Diego Castro',   apt: 'Torre A - 521', status: 'Activo' },
 ];
 
-statVehicles.textContent = residentsDB.length * 17 + 1;
+// Total de residentes del conjunto (mostrado en el dashboard).
+const TOTAL_RESIDENTS = 120;
+// Vehiculos registrados = proporcion de residentes con vehiculo
+// sobre el total del conjunto (no todos los residentes tienen auto).
+const vehicleResidents = residentsDB.filter(r => r.type === 'vehicle').length;
+statVehicles.textContent = Math.round(TOTAL_RESIDENTS * vehicleResidents / residentsDB.length);
 
 
 /* ================================================================
@@ -248,15 +257,27 @@ function showAuthorized() {
     const resident = residentsDB[Math.floor(Math.random() * residentsDB.length)];
     const uid = generateUID();
     const now = new Date();
+    const isVehicle = resident.type === 'vehicle';
 
     // Rellenamos los datos de la tarjeta verde
     $('resName').textContent     = resident.name;
     $('resApt').textContent      = resident.apt;
-    $('resVehicle').textContent  = resident.vehicle;
-    $('resPlate').textContent    = resident.plate;
+    $('resAccessType').textContent = isVehicle ? 'Vehicular 🚗' : 'Peatonal 🚶';
+    $('resVehicle').textContent  = isVehicle ? resident.vehicle : '—';
+    $('resPlate').textContent    = isVehicle ? resident.plate   : '—';
     $('resStatus').textContent   = resident.status;
     $('resUid').textContent      = uid;
     $('resDateTime').textContent = `${formatDate(now)} · ${formatTime(now)}`;
+
+    // Mostrar/ocultar los campos que solo aplican a vehiculos.
+    const vehicleField = $('resVehicleField');
+    const plateField   = $('resPlateField');
+    if (vehicleField) vehicleField.style.display = isVehicle ? '' : 'none';
+    if (plateField)   plateField.style.display   = isVehicle ? '' : 'none';
+
+    // Cambia el titulo de la tarjeta segun el tipo de acceso
+    const statusEl = document.querySelector('#stateAuthorized .result-card__status');
+    if (statusEl) statusEl.textContent = isVehicle ? 'ACCESO VEHICULAR AUTORIZADO' : 'ACCESO PEATONAL AUTORIZADO';
 
     showState(stateAuthorized);
     playSuccessSound();   // sonido de éxito
@@ -264,7 +285,11 @@ function showAuthorized() {
     // Actualiza contadores e historial
     authorizedCount++;
     statAuthorized.textContent = authorizedCount;
-    addHistoryRow(uid, true, now, resident.plate, resident.vehicle);
+    if (isVehicle) {
+        addHistoryRow(uid, true, now, resident.plate, resident.vehicle, 'vehicle');
+    } else {
+        addHistoryRow(uid, true, now, '—', 'Peatón', 'pedestrian');
+    }
 }
 
 // ---- CASO 2: TARJETA NO REGISTRADA ----
@@ -283,7 +308,7 @@ function showDenied() {
     // Actualiza contadores e historial
     deniedCount++;
     statDenied.textContent = deniedCount;
-    addHistoryRow(uid, false, now, plate, 'No registrado');
+    addHistoryRow(uid, false, now, plate, 'No registrado', 'unknown');
 }
 
 
@@ -292,22 +317,33 @@ function showDenied() {
    --------------------------------------------------------------
    Agrega una fila nueva a la tabla por cada lectura.
    ================================================================ */
-function addHistoryRow(uid, authorized, date) {
-    // Si existe la fila vacía inicial, se elimina
-    if (historyEmpty) historyEmpty.remove();
+function addHistoryRow(uid, authorized, date, plate, vehicle, type = 'vehicle') {
+    // Si existe la fila vacía inicial, se elimina (se busca en vivo
+    // porque clearHistory() regenera el nodo del DOM).
+    const empty = historyBody.querySelector('.history__empty');
+    if (empty) empty.remove();
 
     const row = document.createElement('tr');
     row.classList.add('is-new');   // animación de entrada
 
-    // Badge según el resultado
+    // Badge segun el resultado
     const badge = authorized
         ? '<span class="badge badge--success">✓ Autorizado</span>'
         : '<span class="badge badge--danger">✗ Denegado</span>';
 
+    // Distintivo del tipo de acceso (vehicular / peatonal / desconocido)
+    const typeBadge = {
+        vehicle:    '<span class="badge badge--info">🚗 Vehicular</span>',
+        pedestrian: '<span class="badge badge--neutral">🚶 Peatonal</span>',
+        unknown:    '<span class="badge badge--warning">❓ Desconocido</span>',
+    }[type] || '<span class="badge badge--warning">❓ Desconocido</span>';
+
     row.innerHTML = `
         <td>${formatDate(date)}</td>
         <td class="mono">${formatTime(date)}</td>
-        <td class="mono">${uid}</td>
+        <td>${typeBadge}</td>
+        <td class="mono">${plate}</td>
+        <td>${vehicle}</td>
         <td>${badge}</td>
     `;
 
@@ -324,7 +360,7 @@ function addHistoryRow(uid, authorized, date) {
 function clearHistory() {
     historyBody.innerHTML = `
         <tr class="history__empty" id="historyEmpty">
-            <td colspan="4">Aún no se han registrado accesos.</td>
+            <td colspan="6">Aún no se han registrado accesos.</td>
         </tr>
     `;
 }

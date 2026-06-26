@@ -17,6 +17,12 @@
     --success-soft:  rgba(5, 150, 105, .10);
     --danger:        #dc2626;   /* Rojo acceso denegado */
     --danger-soft:   rgba(220, 38, 38, .08);
+    --info:          #2563eb;   /* Azul acceso vehicular */
+    --info-soft:     rgba(37, 99, 235, .10);
+    --neutral:       #475569;   /* Gris acceso peatonal */
+    --neutral-soft:  rgba(100, 116, 139, .12);
+    --warning:       #b45309;   /* Ambar tipo desconocido */
+    --warning-soft:  rgba(180, 83, 9, .10);
     --radius:        16px;
     --radius-sm:     10px;
     --shadow:        0 10px 30px rgba(15, 23, 42, .10);
@@ -174,6 +180,12 @@ html[data-theme="dark"] {
     --success-soft:  rgba(16, 185, 129, .12);
     --danger:        #ef4444;
     --danger-soft:   rgba(239, 68, 68, .12);
+    --info:          #3b82f6;
+    --info-soft:     rgba(59, 130, 246, .15);
+    --neutral:       #94a3b8;
+    --neutral-soft:  rgba(148, 163, 184, .15);
+    --warning:       #f59e0b;
+    --warning-soft:  rgba(245, 158, 11, .15);
     --shadow:        0 10px 30px rgba(0, 0, 0, .35);
 }
 /* En tema oscuro, la topbar vuelve a pizarra y se muestra la luna */
@@ -532,7 +544,7 @@ html[data-theme="dark"] .stat--danger  { border-color: rgba(239, 68, 68, .3); }
 .history__table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 560px;
+    min-width: 720px;
 }
 .history__table th {
     text-align: left;
@@ -571,6 +583,9 @@ html[data-theme="dark"] .stat--danger  { border-color: rgba(239, 68, 68, .3); }
 }
 .badge--success { background: var(--success-soft); color: var(--success); }
 .badge--danger  { background: var(--danger-soft);  color: var(--danger); }
+.badge--info    { background: var(--info-soft);    color: var(--info); }
+.badge--neutral { background: var(--neutral-soft); color: var(--neutral); }
+.badge--warning { background: var(--warning-soft); color: var(--warning); }
 
 /* ================================================================
    11. PIE DE PÁGINA

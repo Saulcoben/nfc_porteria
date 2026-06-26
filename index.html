@@ -166,7 +166,7 @@
                         </svg>
                     </div>
                     <p class="display-state__text">Listo para leer</p>
-                    <p class="display-state__hint">Acerque la tarjeta del residente para validar vehiculo y placa</p>
+                    <p class="display-state__hint">Acerque la tarjeta del residente para validar su ingreso (vehicular o peatonal)</p>
                     <div class="vehicle-preview" aria-hidden="true">
                         <span class="vehicle-preview__car"></span>
                         <span class="vehicle-preview__plate">ABC 123</span>
@@ -185,7 +185,7 @@
                             <path d="M12 12h.01"/>
                         </svg>
                     </div>
-                    <p class="display-state__text">Verificando residente y vehiculo...</p>
+                    <p class="display-state__text">Verificando residente...</p>
                     <div class="reading-bar"><span></span></div>
                 </div>
 
@@ -201,8 +201,9 @@
                         <div class="result-card__body">
                             <div class="field"><span>Nombre</span><strong id="resName">—</strong></div>
                             <div class="field"><span>Apartamento</span><strong id="resApt">—</strong></div>
-                            <div class="field"><span>Vehiculo</span><strong id="resVehicle">—</strong></div>
-                            <div class="field"><span>Placa</span><strong id="resPlate" class="plate">—</strong></div>
+                            <div class="field"><span>Tipo de acceso</span><strong id="resAccessType">—</strong></div>
+                            <div class="field" id="resVehicleField"><span>Vehiculo</span><strong id="resVehicle">—</strong></div>
+                            <div class="field" id="resPlateField"><span>Placa</span><strong id="resPlate" class="plate">—</strong></div>
                             <div class="field"><span>Estado</span><strong id="resStatus">—</strong></div>
                             <div class="field"><span>UID</span><strong id="resUid" class="mono">—</strong></div>
                             <div class="field"><span>Fecha y hora</span><strong id="resDateTime">—</strong></div>
@@ -291,6 +292,7 @@
                         <tr>
                             <th>Fecha</th>
                             <th>Hora</th>
+                            <th>Tipo</th>
                             <th>Placa</th>
                             <th>Vehiculo</th>
                             <th>Resultado</th>
@@ -299,7 +301,7 @@
                     <tbody id="historyBody">
                         <!-- Fila vacía inicial -->
                         <tr class="history__empty" id="historyEmpty">
-                            <td colspan="5">Aun no se han registrado accesos vehiculares.</td>
+                            <td colspan="6">Aun no se han registrado accesos vehiculares.</td>
                         </tr>
                     </tbody>
                 </table>
